@@ -25,23 +25,30 @@ public class Utils {
 			return false;
 		}
 	}
-	
+
 	public static ValidationResult isValidCustomerDonationRequest (CustomerDonation custDon){
 		
-		ValidationResult vRes = new ValidationResult();
-		vRes.setValid(true);
-		return vRes;
+		ValidationResult vResult = new ValidationResult();
+		List<String> codes = new ArrayList<String>();
+		boolean isValid = true;
+
+		if(Utils.isEmptyString(custDon.getDonor_email())){
+			isValid = false;
+			codes.add(Constants.ID_MISSING);
+		}
+
+		vResult.setValid(true);
+		return vResult;
 	}
-	
+
 	public static ValidationResult isValidOrderRequest(Order order){
-		
+
 		String requestType = order.getRequestType();
 		ValidationResult vResult = new ValidationResult();
 		List<String> codes = new ArrayList<String>();
 		boolean isValid = true;
 		
 		if(Constants.CANCEL_REQUEST.equals(requestType)){
-			
 			if(Utils.isEmptyString(order.getId())){
 				isValid = false;
 				codes.add(Constants.ID_MISSING);
@@ -53,14 +60,6 @@ public class Utils {
 			if(Utils.isEmptyString(order.getComment())){
 				isValid = false;
 				codes.add(Constants.COMMENT_MISSING);
-			}
-			if(isValid){
-				vResult.setValid(true);
-				return vResult;
-			}else{
-				vResult.setValid(false);
-				vResult.setCodesList((String[])codes.toArray());
-				return vResult;
 			}
 		}else if (Constants.RESCHEDULE_REQUEST.equals(requestType)){
 			
@@ -76,20 +75,23 @@ public class Utils {
 				isValid = false;
 				codes.add(Constants.DUEDATE_MISSING);
 			}
-			if(isValid){
-				vResult.setValid(true);
-				return vResult;
-			}else{
-				vResult.setValid(false);
-				vResult.setCodesList((String[])codes.toArray());
-				return vResult;
-			}
-		}else{
+		} else {
 			return null;
 		}
+
+		setIsValid(isValid, codes, vResult);
+		return vResult;
 	}
 
-	
+	public static void setIsValid(boolean isValid, List<String> codes, ValidationResult vResult) {
+		vResult.setValid(true);
+		if(!isValid){
+			vResult.setValid(false);
+			vResult.setCodesList((String[])codes.toArray());
+		}
+		return;
+	}
+
 	public static Response createErrorResponse(ValidationResult vResult){
 		Response res = new Response();
 		if(vResult.isValid()){
